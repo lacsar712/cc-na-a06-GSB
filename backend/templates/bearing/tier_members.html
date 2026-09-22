@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}{{ label }}灯号列表 · 航标灯光巡检台{% endblock %}
+{% block body %}
+{% if frozen %}
+<h1>快照 #{{ snapshot.id }} · {{ label }}（{{ rows|length }} 条）</h1>
+<p>冻结档界：{{ snapshot.low_bound }} / {{ snapshot.high_bound }} 度；签发于
+  {{ snapshot.issued_at|date:"Y-m-d H:i" }}，签发人 {{ snapshot.issued_by }}。</p>
+<p><a href="{% url 'snapshot_detail' snapshot.pk %}">返回快照正文</a></p>
+{% else %}
+<h1>{{ label }} · 灯号列表（{{ rows|length }} 条）</h1>
+<p>按当前档界 {{ low_bound }} / {{ high_bound }} 度实时分档，改档界后本列表随之变化。</p>
+<p><a href="{% url 'tier_overview' %}">返回方位分档现场页</a></p>
+{% endif %}
+
+<table>
+  <thead><tr><th>实测记录主键</th><th>航标编号</th><th>方位偏差（度）</th><th>偏角绝对值</th></tr></thead>
+  <tbody>
+  {% for row in rows %}
+    <tr>
+      {% if frozen %}
+        <td>{{ row.inspection_id }}</td>
+      {% else %}
+        <td>{{ row.pk }}</td>
+      {% endif %}
+      <td>{{ row.aid_code }}</td>
+      <td>{{ row.bearing_error_deg }}</td>
+      <td>{{ row.abs_bearing }}</td>
+    </tr>
+  {% empty %}
+    <tr><td colspan="4">本档没有灯号</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

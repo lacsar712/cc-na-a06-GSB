@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}分档快照 #{{ snapshot.id }} · 航标灯光巡检台{% endblock %}
+{% block body %}
+<h1>方位分档快照 #{{ snapshot.id }}</h1>
+<p>本快照正文已冻结，事后修改档界不影响本页内容。</p>
+<table style="max-width:520px">
+  <tr><th>签发时间</th><td>{{ snapshot.issued_at|date:"Y-m-d H:i" }}</td></tr>
+  <tr><th>签发人</th><td>{{ snapshot.issued_by }}</td></tr>
+  <tr><th>冻结第一道档界</th><td>{{ snapshot.low_bound }} 度</td></tr>
+  <tr><th>冻结第二道档界</th><td>{{ snapshot.high_bound }} 度</td></tr>
+  {% if snapshot.note %}<tr><th>附注</th><td>{{ snapshot.note }}</td></tr>{% endif %}
+</table>
+
+<h2>各档条数与成员主键</h2>
+<table>
+  <thead><tr><th>档位</th><th>条数</th><th>成员实测记录主键</th><th></th></tr></thead>
+  <tbody>
+  {% for t in snapshot.tiers.all %}
+    <tr>
+      <td>{{ t.label }}</td>
+      <td>{{ t.count }}</td>
+      <td>
+        {% for m in t.members.all %}{{ m.inspection_id }}{% if not forloop.last %}、{% endif %}{% empty %}—{% endfor %}
+      </td>
+      <td><a href="{% url 'snapshot_tier' snapshot.pk t.tier %}">灯号列表</a></td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+<p><a href="{% url 'snapshot_list' %}">返回全部快照</a> · <a href="{% url 'tier_overview' %}">返回现场页</a></p>
+{% endblock %}

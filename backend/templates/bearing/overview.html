@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}方位分档 · 航标灯光巡检台{% endblock %}
+{% block body %}
+<h1>方位分档（现场页）</h1>
+<p>按方位偏差绝对值分三档，当前两道档界：<strong>{{ setting.low_bound }}</strong> 度 / <strong>{{ setting.high_bound }}</strong> 度
+  （{{ setting.updated_at|date:"Y-m-d H:i" }} 由 {{ setting.updated_by|default:"—" }} 保存）</p>
+
+{% if error %}<p class="err">{{ error }}</p>{% endif %}
+
+{% if can_write %}
+<form class="card" method="post" style="max-width:520px">
+  {% csrf_token %}
+  <label>第一道档界（小/中，度）</label>
+  <input name="low_bound" type="number" step="0.1" min="0" value="{{ setting.low_bound }}" />
+  <label>第二道档界（中/大，度，须大于第一道）</label>
+  <input name="high_bound" type="number" step="0.1" min="0" value="{{ setting.high_bound }}" />
+  <button type="submit">保存档界</button>
+</form>
+
+<form method="post" action="{% url 'snapshot_issue' %}" style="margin:16px 0">
+  {% csrf_token %}
+  <input name="note" type="text" maxlength="200" placeholder="快照附注（可选）"
+         style="padding:8px; width:300px; box-sizing:border-box" />
+  <button type="submit">签发分档快照</button>
+</form>
+{% else %}
+<p class="err">只读账号：可查看本页与已签发快照，不能改档界、不能签发。</p>
+{% endif %}
+
+<table>
+  <thead><tr><th>档位</th><th>判据（偏角绝对值）</th><th>条数</th><th></th></tr></thead>
+  <tbody>
+  {% for b in buckets %}
+    <tr>
+      <td>{{ b.label }}</td>
+      <td>
+        {% if b.tier == 0 %}|偏差| &lt; {{ setting.low_bound }}
+        {% elif b.tier == 1 %}{{ setting.low_bound }} ≤ |偏差| &lt; {{ setting.high_bound }}
+        {% else %}|偏差| ≥ {{ setting.high_bound }}{% endif %}
+      </td>
+      <td>{{ b.count }}</td>
+      <td><a href="{% url 'tier_members' b.tier %}">查看灯号列表</a></td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+
+<h2>近期快照</h2>
+<table>
+  <thead><tr><th>编号</th><th>签发时间</th><th>签发人</th><th>冻结档界</th><th></th></tr></thead>
+  <tbody>
+  {% for s in snapshots %}
+    <tr>
+      <td>#{{ s.id }}</td>
+      <td>{{ s.issued_at|date:"Y-m-d H:i" }}</td>
+      <td>{{ s.issued_by }}</td>
+      <td>{{ s.low_bound }} / {{ s.high_bound }}</td>
+      <td><a href="{% url 'snapshot_detail' s.pk %}">打开快照</a></td>
+    </tr>
+  {% empty %}
+    <tr><td colspan="5">还没有签发过快照</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+<p><a href="{% url 'snapshot_list' %}">全部快照</a></p>
+{% endblock %}

@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}分档快照留存 · 航标灯光巡检台{% endblock %}
+{% block body %}
+<h1>分档快照留存</h1>
+<table>
+  <thead><tr><th>编号</th><th>签发时间</th><th>签发人</th><th>冻结档界（度）</th><th>附注</th><th></th></tr></thead>
+  <tbody>
+  {% for s in snapshots %}
+    <tr>
+      <td>#{{ s.id }}</td>
+      <td>{{ s.issued_at|date:"Y-m-d H:i" }}</td>
+      <td>{{ s.issued_by }}</td>
+      <td>{{ s.low_bound }} / {{ s.high_bound }}</td>
+      <td>{{ s.note }}</td>
+      <td><a href="{% url 'snapshot_detail' s.pk %}">打开</a></td>
+    </tr>
+  {% empty %}
+    <tr><td colspan="6">还没有签发过快照</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+<p><a href="{% url 'tier_overview' %}">返回现场页</a></p>
+{% endblock %}

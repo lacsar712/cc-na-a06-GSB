@@ -1,12 +1,12 @@
 from django.contrib.auth.models import Group, User
 from django.core.management.base import BaseCommand
 
-from inspection.models import Inspection
+from inspection.models import BearingTierSetting, Inspection
 from inspection.rules import judge
 
 
 class Command(BaseCommand):
-    help = "seed two inspections and two accounts"
+    help = "seed two inspections, two accounts and bearing tier bounds"
 
     def handle(self, *args, **options):
         group, _ = Group.objects.get_or_create(name="inspector")
@@ -20,6 +20,8 @@ class Command(BaseCommand):
             watch.set_password("watch123456")
             watch.save()
         watch.groups.remove(group)
+        if not BearingTierSetting.objects.exists():
+            BearingTierSetting.objects.create(low_bound=0.5, high_bound=2.0)
         if Inspection.objects.exists():
             self.stdout.write("already seeded")
             return
