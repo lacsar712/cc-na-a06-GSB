@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}方位分档 · 航标灯光巡检台{% endblock %}
+{% block body %}
+<h1>方位分档</h1>
+<p>按实测方位偏差的绝对值分三档，分档在服务端计算。当前两道档界为
+  <strong>{{ setting.near_bound|stringformat:"g" }}</strong> 与 <strong>{{ setting.far_bound|stringformat:"g" }}</strong> 度。</p>
+
+<h2>现场各档</h2>
+<table>
+  <thead><tr><th>档位</th><th>范围（度）</th><th>条数</th><th></th></tr></thead>
+  <tbody>
+  {% for card in bucket_cards %}
+    <tr>
+      <td>{{ card.name }}</td>
+      <td>{{ card.label }}</td>
+      <td>{{ card.count }}</td>
+      <td><a href="{% url 'classification_bucket' card.index %}">查看该档灯号</a></td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+
+{% if can_write %}
+<h2>修改两道档界</h2>
+{% if error %}<p class="err">{{ error }}</p>{% endif %}
+<form class="card" method="post">
+  {% csrf_token %}
+  <input type="hidden" name="action" value="update" />
+  <label>第一道档界（小偏角 / 中偏角，度）</label>
+  <input name="near_bound" type="number" step="0.1" value="{{ setting.near_bound|stringformat:"g" }}" />
+  <label>第二道档界（中偏角 / 大偏角，度）</label>
+  <input name="far_bound" type="number" step="0.1" value="{{ setting.far_bound|stringformat:"g" }}" />
+  <button type="submit">保存档界</button>
+  <span class="hint">只影响现场页，已签发的快照不变</span>
+</form>
+
+<h2>签发分档快照</h2>
+<form class="card" method="post">
+  {% csrf_token %}
+  <input type="hidden" name="action" value="issue" />
+  <p>按当前档界冻结三档条数与成员主键，留存备查。</p>
+  <button type="submit">签发快照</button>
+</form>
+{% else %}
+<p class="hint">只读账号：现场页与快照可查看，档界与签发仅限持灯账号。</p>
+{% endif %}
+
+<h2>已签发快照</h2>
+<table>
+  <thead><tr><th>#</th><th>签发时间</th><th>签发人</th><th>档界</th><th>三档条数</th><th></th></tr></thead>
+  <tbody>
+  {% for snap in snapshots %}
+    <tr>
+      <td>{{ snap.id }}</td>
+      <td>{{ snap.issued_at|date:"Y-m-d H:i" }}</td>
+      <td>{{ snap.issued_by }}</td>
+      <td>{{ snap.near_bound|stringformat:"g" }} / {{ snap.far_bound|stringformat:"g" }}</td>
+      <td>{{ snap.near_count }} · {{ snap.mid_count }} · {{ snap.far_count }}</td>
+      <td><a href="{% url 'snapshot_detail' snap.id %}">查看</a></td>
+    </tr>
+  {% empty %}
+    <tr><td colspan="6">还没有签发过快照</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+<p><a href="{% url 'snapshot_list' %}">快照留存册</a></p>
+{% endblock %}

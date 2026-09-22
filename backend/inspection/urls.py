@@ -9,4 +9,12 @@ urlpatterns = [
     path("", views.list_view, name="list"),
     path("inspections/new/", views.create_view, name="create"),
     path("inspections/<int:pk>/", views.detail_view, name="detail"),
+    path("classification/", views.classification_view, name="classification"),
+    path(
+        "classification/bucket/<int:bucket>/",
+        views.classification_bucket_view,
+        name="classification_bucket",
+    ),
+    path("snapshots/", views.snapshot_list_view, name="snapshot_list"),
+    path("snapshots/<int:pk>/", views.snapshot_detail_view, name="snapshot_detail"),
 ]

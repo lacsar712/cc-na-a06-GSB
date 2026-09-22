@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}快照 #{{ snapshot.id }} · 分档快照{% endblock %}
+{% block body %}
+<h1>分档快照 #{{ snapshot.id }}</h1>
+<p>签发时间 {{ snapshot.issued_at|date:"Y-m-d H:i" }}，签发人 {{ snapshot.issued_by }}。</p>
+<p>签发时冻结的两道档界：<strong>{{ snapshot.near_bound|stringformat:"g" }}</strong> 与
+  <strong>{{ snapshot.far_bound|stringformat:"g" }}</strong> 度，共 {{ snapshot.total_count }} 条。</p>
+
+{% for card in bucket_cards %}
+<h2>{{ card.label }} —— {{ card.count }} 条</h2>
+<table>
+  <thead><tr><th>成员主键</th><th>航标编号</th><th>方位偏差（度）</th><th></th></tr></thead>
+  <tbody>
+  {% for member in card.members %}
+    <tr>
+      <td>{{ member.inspection_id }}</td>
+      <td>{{ member.inspection.aid_code }}</td>
+      <td>{{ member.inspection.bearing_error_deg }}</td>
+      <td><a href="{% url 'detail' member.inspection_id %}">实测详情</a></td>
+    </tr>
+  {% empty %}
+    <tr><td colspan="4">该档无成员</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endfor %}
+
+<p><a href="{% url 'snapshot_list' %}">返回快照留存册</a> ·
+   <a href="{% url 'classification' %}">返回方位分档现场页</a></p>
+{% endblock %}

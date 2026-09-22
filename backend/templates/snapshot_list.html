@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}分档快照留存册 · 航标灯光巡检台{% endblock %}
+{% block body %}
+<h1>分档快照留存册</h1>
+<p>每份快照在签发时冻结两道档界、每档条数和成员主键；之后修改档界不影响已签发快照的正文。</p>
+<table>
+  <thead><tr><th>#</th><th>签发时间</th><th>签发人</th><th>档界</th><th>三档条数（小 · 中 · 大）</th><th></th></tr></thead>
+  <tbody>
+  {% for snap in snapshots %}
+    <tr>
+      <td>{{ snap.id }}</td>
+      <td>{{ snap.issued_at|date:"Y-m-d H:i" }}</td>
+      <td>{{ snap.issued_by }}</td>
+      <td>{{ snap.near_bound|stringformat:"g" }} / {{ snap.far_bound|stringformat:"g" }}</td>
+      <td>{{ snap.near_count }} · {{ snap.mid_count }} · {{ snap.far_count }}</td>
+      <td><a href="{% url 'snapshot_detail' snap.id %}">查看正文</a></td>
+    </tr>
+  {% empty %}
+    <tr><td colspan="6">还没有签发过快照</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+<p><a href="{% url 'classification' %}">返回方位分档现场页</a></p>
+{% endblock %}

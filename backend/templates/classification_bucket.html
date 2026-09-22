@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}{{ bucket_name }}灯号 · 方位分档{% endblock %}
+{% block body %}
+<h1>{{ bucket_name }}灯号</h1>
+<p>当前档界范围：{{ label }} 度，共 {{ items|length }} 条。</p>
+<table>
+  <thead><tr><th>航标编号</th><th>方位偏差（度）</th><th>|偏差|</th><th>结论</th><th></th></tr></thead>
+  <tbody>
+  {% for row, abs_value in items %}
+    <tr>
+      <td>{{ row.aid_code }}</td>
+      <td>{{ row.bearing_error_deg }}</td>
+      <td>{{ abs_value }}</td>
+      <td class="{% if row.verdict == '合格' %}ok{% else %}bad{% endif %}">{{ row.verdict }}</td>
+      <td><a href="{% url 'detail' row.pk %}">详情</a></td>
+    </tr>
+  {% empty %}
+    <tr><td colspan="5">该档暂无灯号</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+<p><a href="{% url 'classification' %}">返回方位分档现场页</a></p>
+{% endblock %}

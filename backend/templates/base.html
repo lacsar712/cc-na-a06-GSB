@@ -16,6 +16,8 @@
     input { width: 100%; padding: 8px; box-sizing: border-box; }
     button { margin-top: 14px; background: #0f3d3e; color: #fff; border: 0; padding: 8px 16px; }
     .err { color: #9b1c1c; }
+    .hint { color: #51615c; font-size: 13px; margin-left: 10px; }
+    form.card p { margin: 6px 0; }
   </style>
 </head>
 <body>
@@ -23,6 +25,7 @@
     <strong>航标灯光巡检台</strong>
     {% if user.is_authenticated %}
       <a href="{% url 'list' %}">巡检记录</a>
+      <a href="{% url 'classification' %}">方位分档</a>
       {% if can_write %}<a href="{% url 'create' %}">登记</a>{% endif %}
       <span style="margin-left:auto">{{ user.username }}</span>
       <a href="{% url 'logout' %}">退出</a>

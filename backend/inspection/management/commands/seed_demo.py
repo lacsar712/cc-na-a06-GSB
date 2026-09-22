@@ -1,12 +1,12 @@
 from django.contrib.auth.models import Group, User
 from django.core.management.base import BaseCommand
 
-from inspection.models import Inspection
+from inspection.models import ClassificationSetting, Inspection
 from inspection.rules import judge
 
 
 class Command(BaseCommand):
-    help = "seed two inspections and two accounts"
+    help = "seed inspections (incl. a bright 0.4deg light) and two accounts"
 
     def handle(self, *args, **options):
         group, _ = Group.objects.get_or_create(name="inspector")
@@ -20,12 +20,18 @@ class Command(BaseCommand):
             watch.set_password("watch123456")
             watch.save()
         watch.groups.remove(group)
+        # 两道档界（默认 0.5 / 2 度），持灯账号可在现场页修改
+        if ClassificationSetting.objects.exists():
+            self.stdout.write("classification setting already present")
+        else:
+            ClassificationSetting.objects.create(near_bound=0.5, far_bound=2.0)
         if Inspection.objects.exists():
             self.stdout.write("already seeded")
             return
         samples = [
             ("LH-01", 1400, 1200, 0.4),
             ("LH-09", 800, 1200, 0.2),
+            ("BR-01", 2600, 1200, 0.4),
         ]
         for code, measured, required, bearing in samples:
             verdict, note = judge(measured, required, bearing)
